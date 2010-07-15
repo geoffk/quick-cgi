@@ -11,6 +11,7 @@
 
 require 'cgi'
 require 'haml'
+require 'mail'
 
 DEFAULT_MASTER_LAYOUT = <<TEMP
 %html
@@ -37,6 +38,7 @@ module QuickCGI
       @master_layout_file = nil
       @cgi = CGI.new
       @page_contents = ""
+      @admin_email = nil
     end
 
     def self.run(options=nil,&block)
@@ -52,6 +54,7 @@ module QuickCGI
         print haml.render(q){ q.page_contents }
       rescue StandardError => e
         display_error(e)
+        email_error(e)
       end
     end
 
@@ -68,6 +71,16 @@ module QuickCGI
           </body>
         </html>
       END_ERROR
+    end
+
+    def self.email_error(e)
+      return unless @admin_email
+      mail = Mail.new do
+        from ENV['USER'] + '@' + ENV['HOSTNAME']
+        to @admin_email
+        subject "CGI ERROR: #{$0}"
+        body %|Error: #{e}\n#{e.backtrace.join("\n")}|
+      end
     end
 
     # Render something to the page.  You must specify the type of render to perform: haml, partial or text.
@@ -115,6 +128,13 @@ module QuickCGI
       @master_layour_file = f
     end
     alias_method :master_layout_file=, :master_layout_file
+
+    # Set or return admin email address for error emails
+    def admin_email(e=nil)
+      return @admin_email unless e
+      @admin_email = e
+    end
+    alias_method :admin_email=, :admin_email
 
     # Returns a hash of the CGI parameters
     def params

@@ -5,7 +5,8 @@
 # QuickCGI::Page.run do
 #   title "My title"
 #   @my_variable = "Hello"
-#   render_haml('file.haml')
+#   render(:haml=>'file.haml')
+#   render(:text=>'<p>My html text</p>')
 # end
 
 require 'cgi'
@@ -35,7 +36,7 @@ module QuickCGI
       @title = 'QuickCGI Page Default Title'
       @master_layout_file = nil
       @cgi = CGI.new
-      @page_contents = nil
+      @page_contents = ""
     end
 
     def self.run(options=nil,&block)
@@ -69,27 +70,53 @@ module QuickCGI
       END_ERROR
     end
 
-    def render_haml(template_file)
-      template_content = File.read(template_file)
-      @page_contents = Haml::Engine.new(template_content).render(self) 
+    # Render something to the page.  You must specify the type of render to perform: haml, partial or text.
+    #
+    # haml: Renders the given haml file to the @page_contents buffer
+    # example: 
+    #   render(:haml => 'myfile.haml')
+    #
+    # text: Renders the text to the @page_contents buffer
+    # example: 
+    #   render(:text => '<p>A paragraph to put on the page</p>'
+    #
+    # partial: Returns the results of rendering the given haml file, only 
+    # useful inside an existing haml file.
+    # example:
+    #   = render(:partial => 'mypartial.haml')
+    #
+    # Note that it is possible to make multiple haml and text renders to the same page.  Each
+    # piece of content will simply be appended to the page.
+    #
+    def render(options)
+      if options[:haml]
+        template_content = File.read(options[:haml])
+        @page_contents << Haml::Engine.new(template_content).render(self) 
+      elsif options[:partial]
+        template_content = File.read(options[:haml])
+        return Haml::Engine.new(template_content).render(self) 
+      elsif options[:text]
+        @page_contents << options[:text]
+      else
+         raise "No render type found.  Must be haml, partial or text"
+      end
     end
 
-    def render_text(text)
-      @page_contents = text
-    end
-
+    # Set or return the title instance variable that is used in the default master layout
     def title(t=nil)
       return @title unless t
       @title = t
     end
     alias_method :title=, :title
 
+    # Set or return an alternative haml file to be used as the master layout
     def master_layout_file(f=nil)
       return @master_layout_file unless f
       @master_layour_file = f
     end
     alias_method :master_layout_file=, :master_layout_file
 
+    # Returns a hash of the CGI parameters
     def params
       @cgi.params
     end

@@ -6,5 +6,6 @@ QuickCGI::Page.run do
   title "Test page"
   @test_variable = 'three'
   @params_string = params.inspect
-  render_haml('test.haml')
+  render(:haml=>'test.haml')
+  render(:text=>'Hello, this is some text')
 end

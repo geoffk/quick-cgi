@@ -15,7 +15,14 @@ DEFAULT_MASTER_LAYOUT = <<TEMP
 %html
   %head
     %title=@title
+    %style{:type=>'text/css'}
+      body { font-family: verdana, arial; }
+      div.header { width: 100%; height: 40px; background-color: #0000ff; text-align: center; display: block; vertical-align: bottom; font-family: verdana, arial, sans-serif; color: white; font-weight: bold; font-size: 24px; }
+      span.comments { font-size: 12px; color: #777; display: block; }
+      td { vertical-align: top; }
+      input.submit { font-weight: bold; }
   %body
+    %div.header=@title
     =yield
 TEMP
 

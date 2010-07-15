@@ -7,7 +7,6 @@ QuickCGI::Page.run do
   admin_email 'geoffk@ci.garden-grove.ca.us'
   @test_variable = 'three'
   @params_string = params.inspect
-  uh-oh!
   render(:haml=>'test.haml')
   render(:text=>'Hello, this is some text')
 end

@@ -54,7 +54,7 @@ module QuickCGI
         print haml.render(q){ q.page_contents }
       rescue StandardError => e
         display_error(e)
-        email_error(e)
+        email_error(q.admin_email,e)
       end
     end
 
@@ -73,14 +73,15 @@ module QuickCGI
       END_ERROR
     end
 
-    def self.email_error(e)
-      return unless @admin_email
+    def self.email_error(email,e)
+      return unless email
       mail = Mail.new do
         from ENV['USER'] + '@' + ENV['HOSTNAME']
-        to @admin_email
+        to email
         subject "CGI ERROR: #{$0}"
         body %|Error: #{e}\n#{e.backtrace.join("\n")}|
       end
+      mail.deliver!
     end
 
     # Render something to the page.  You must specify the type of render to perform: haml, partial or text.

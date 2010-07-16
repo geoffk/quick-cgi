@@ -2,14 +2,12 @@
 # Library to assist in the making of CGI pages using HAML.
 #
 # Usage:
-# print QuickCGI::Page.run do
+# print QuickCGI::Page.run(:admin_email => 'geoffk@garden-grove.org') do
 #   title "My title"
 #   @my_variable = "Hello"
 #   render(:haml=>'file.haml')
 #   render(:text=>'<p>My html text</p>')
 # end
-#
-# Tip: Set $DEBUG to true to disable email on errors
 
 require 'cgi'
 require 'haml'
@@ -119,7 +117,7 @@ module QuickCGI
 
   class Generator
     def self.generate(options={},&block)
-      @options = {
+      @@options = {
         :raise_errors => false, # Raises errors instead of handling them internally
         :admin_email => nil
       }.merge(options)
@@ -128,10 +126,10 @@ module QuickCGI
         q.instance_eval(&block) 
         q.generate
       rescue StandardError => e
-        if @options[:raise_errors]
+        if @@options[:raise_errors]
           raise
         else
-          email_error(e) if @options[:admin_email]
+          email_error(e) if @@options[:admin_email]
           display_error(e)
         end
       end
@@ -155,13 +153,14 @@ module QuickCGI
     end
 
     def self.email_error(e)
-      return unless @admin_email
+      return unless @@options[:admin_email]
       mail = Mail.new do
         from ENV['USER'] + '@' + ENV['HOSTNAME']
-        to email
+        to @@options[:admin_email]
         subject "CGI ERROR: #{$0}"
         body %|Error: #{e}\n#{e.backtrace.join("\n")}|
       end
+      puts mail.inspect
       mail.deliver!
     end
   end

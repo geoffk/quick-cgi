@@ -68,7 +68,8 @@ class QuickCGITest < Test::Unit::TestCase
     end
   end
 
-  def test_handle_internal_errors
+  def test_handle_internal_errors_with_no_email
+    delivered = Mail::Message.delivered
     content = QuickCGI::Generator.generate do
       title "auto test title"
       render :text => '<p>test paragraph</p>'
@@ -79,6 +80,22 @@ class QuickCGITest < Test::Unit::TestCase
     assert_equal 1, ng.css('head').length
     assert_equal 1, ng.css('body').length
     assert ng.css('p').any?{|el| /Error: undefined local variable/.match(el)}
+    assert_equal delivered, Mail::Message.delivered
+  end
+
+  def test_error_email
+    delivered = Mail::Message.delivered
+    content = QuickCGI::Generator.generate(:admin_email => 'geoffk@garden-grove.org') do
+      title "auto test title"
+      render :text => '<p>test paragraph</p>'
+      blah
+    end
+    ng = Nokogiri::HTML.parse(content)
+    assert_equal 1, ng.css('html').length
+    assert_equal 1, ng.css('head').length
+    assert_equal 1, ng.css('body').length
+    assert ng.css('p').any?{|el| /Error: undefined local variable/.match(el)}
+    assert_equal delivered+1, Mail::Message.delivered
   end
 
 end

@@ -53,6 +53,7 @@ module QuickCGI
           layout = DEFAULT_MASTER_LAYOUT
         end
         haml = Haml::Engine.new(layout)
+        print q.cgi.header if ENV['REQUEST_METHOD']
         print haml.render(q){ q.page_contents }
       rescue StandardError => e
         display_error(e)

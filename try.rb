@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 require 'rubygems'
-require '../quick_cgi'
+require 'lib/quick_cgi'
 
 $DEBUG = false
 
@@ -9,5 +9,5 @@ QuickCGI::Page.run do
   admin_email 'geoffk@ci.garden-grove.ca.us'
   @test_variable = 'three'
   @params_string = params.inspect
-  render(:haml=>'test.haml')
+  render(:haml=>'try.haml')
 end

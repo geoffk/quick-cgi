@@ -8,6 +8,8 @@
 #   render(:haml=>'file.haml')
 #   render(:text=>'<p>My html text</p>')
 # end
+#
+# Tip: Set $DEBUG to true to disable email on errors
 
 require 'cgi'
 require 'haml'
@@ -54,7 +56,7 @@ module QuickCGI
         print haml.render(q){ q.page_contents }
       rescue StandardError => e
         display_error(e)
-        email_error(q.admin_email,e)
+        email_error(q.admin_email,e) unless $DEBUG
       end
     end
 

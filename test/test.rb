@@ -1,6 +1,8 @@
 #!/usr/bin/ruby
 require 'rubygems'
-require 'quick_cgi'
+require '../quick_cgi'
+
+$DEBUG = false
 
 QuickCGI::Page.run do
   title "Test page"
@@ -8,5 +10,4 @@ QuickCGI::Page.run do
   @test_variable = 'three'
   @params_string = params.inspect
   render(:haml=>'test.haml')
-  render(:text=>'Hello, this is some text')
 end

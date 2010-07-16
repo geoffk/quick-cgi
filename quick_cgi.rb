@@ -86,7 +86,8 @@ module QuickCGI
       mail.deliver!
     end
 
-    # Render something to the page.  You must specify the type of render to perform: haml, partial or text.
+    # Render something to the page.  You must specify the type of render to perform: haml, 
+    # partial or text.
     #
     # haml: Renders the given haml file to the @page_contents buffer
     # example: 

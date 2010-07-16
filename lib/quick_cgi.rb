@@ -160,7 +160,6 @@ module QuickCGI
         subject "CGI ERROR: #{$0}"
         body %|Error: #{e}\n#{e.backtrace.join("\n")}|
       end
-      puts mail.inspect
       mail.deliver!
     end
   end

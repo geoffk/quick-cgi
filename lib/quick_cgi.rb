@@ -137,7 +137,7 @@ module QuickCGI
 
     def self.display_error(e)
       output = ""
-      output << @cgi.header if ENV['REQUEST_METHOD']
+      output << CGI.new.header if ENV['REQUEST_METHOD']
       output+= <<-END_ERROR
         <html>
           <head>

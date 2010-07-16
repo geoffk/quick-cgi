@@ -4,10 +4,12 @@ require 'lib/quick_cgi'
 
 $DEBUG = false
 
-QuickCGI::Page.run do
+content = QuickCGI::Page.generate do
   title "Test page"
   admin_email 'geoffk@ci.garden-grove.ca.us'
   @test_variable = 'three'
   @params_string = params.inspect
   render(:haml=>'try.haml')
 end
+
+print content

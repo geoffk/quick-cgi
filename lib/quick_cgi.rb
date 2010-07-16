@@ -2,7 +2,7 @@
 # Library to assist in the making of CGI pages using HAML.
 #
 # Usage:
-# QuickCGI::Page.run do
+# print QuickCGI::Page.run do
 #   title "My title"
 #   @my_variable = "Hello"
 #   render(:haml=>'file.haml')
@@ -43,7 +43,8 @@ module QuickCGI
       @admin_email = nil
     end
 
-    def self.run(options=nil,&block)
+    def self.generate(options=nil,&block)
+      output = ""
       begin
         q = self.new(options)
         q.instance_eval(&block)
@@ -53,18 +54,20 @@ module QuickCGI
           layout = DEFAULT_MASTER_LAYOUT
         end
         haml = Haml::Engine.new(layout)
-        print q.cgi.header if ENV['REQUEST_METHOD']
-        print haml.render(q){ q.page_contents }
+        output << q.cgi.header if ENV['REQUEST_METHOD']
+        output << haml.render(q){ q.page_contents }
       rescue StandardError => e
-        display_error(e)
         email_error(q.admin_email,e) unless $DEBUG
+        output << display_error(e)
       end
+      output
     end
 
     def self.display_error(e)
       cgi = CGI.new
-      print cgi.header if ENV['REQUEST_METHOD']
-      print <<-END_ERROR
+      output = ""
+      output << cgi.header if ENV['REQUEST_METHOD']
+      output+= <<-END_ERROR
         <html>
           <head>
             <title>Error found!</title>

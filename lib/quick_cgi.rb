@@ -30,12 +30,14 @@ DEFAULT_MASTER_LAYOUT = <<TEMP
     =yield
 TEMP
 
+
+
 module QuickCGI
+
   class Page
+    attr_reader :cgi, :page_contents, :options
 
-    attr_reader :cgi, :page_contents
-
-    def initialize(options=nil)
+    def initialize(options={})
       @title = 'QuickCGI Page Default Title'
       @master_layout_file = nil
       @cgi = CGI.new
@@ -43,53 +45,16 @@ module QuickCGI
       @admin_email = nil
     end
 
-    def self.generate(options=nil,&block)
-      output = ""
-      begin
-        q = self.new(options)
-        q.instance_eval(&block)
-        if q.master_layout_file
-          layout = File.read(q.master_layout_file)
-        else
-          layout = DEFAULT_MASTER_LAYOUT
-        end
-        haml = Haml::Engine.new(layout)
-        output << q.cgi.header if ENV['REQUEST_METHOD']
-        output << haml.render(q){ q.page_contents }
-      rescue StandardError => e
-        email_error(q.admin_email,e) unless $DEBUG
-        output << display_error(e)
+    def generate
+      if master_layout_file
+        layout = File.read(q.master_layout_file)
+      else
+        layout = DEFAULT_MASTER_LAYOUT
       end
-      output
-    end
-
-    def self.display_error(e)
-      cgi = CGI.new
+      haml = Haml::Engine.new(layout)
       output = ""
-      output << cgi.header if ENV['REQUEST_METHOD']
-      output+= <<-END_ERROR
-        <html>
-          <head>
-            <title>Error found!</title>
-          </head>
-          <body>
-            <h1>There was an error generating the page!</h1>
-            <p><b>Error: #{e}</b></p>
-            <p>#{e.backtrace.join('<br>')}</p>
-          </body>
-        </html>
-      END_ERROR
-    end
-
-    def self.email_error(email,e)
-      return unless email
-      mail = Mail.new do
-        from ENV['USER'] + '@' + ENV['HOSTNAME']
-        to email
-        subject "CGI ERROR: #{$0}"
-        body %|Error: #{e}\n#{e.backtrace.join("\n")}|
-      end
-      mail.deliver!
+      output << cgi.header if ENV['REQUEST_METHOD'] 
+      output << haml.render(self){ page_contents }
     end
 
     # Render something to the page.  You must specify the type of render to perform: haml, 
@@ -151,4 +116,54 @@ module QuickCGI
       @cgi.params
     end
   end
+
+  class Generator
+    def self.generate(options={},&block)
+      @options = {
+        :raise_errors => false, # Raises errors instead of handling them internally
+        :admin_email => nil
+      }.merge(options)
+      begin
+        q = Page.new(options)
+        q.instance_eval(&block) 
+        q.generate
+      rescue StandardError => e
+        if @options[:raise_errors]
+          raise
+        else
+          email_error(e) if @options[:admin_email]
+          display_error(e)
+        end
+      end
+    end
+
+    def self.display_error(e)
+      output = ""
+      output << @cgi.header if ENV['REQUEST_METHOD']
+      output+= <<-END_ERROR
+        <html>
+          <head>
+            <title>Error found!</title>
+          </head>
+          <body>
+            <h1>There was an error generating the page!</h1>
+            <p><b>Error: #{e}</b></p>
+            <p>#{e.backtrace.join('<br>')}</p>
+          </body>
+        </html>
+      END_ERROR
+    end
+
+    def self.email_error(e)
+      return unless @admin_email
+      mail = Mail.new do
+        from ENV['USER'] + '@' + ENV['HOSTNAME']
+        to email
+        subject "CGI ERROR: #{$0}"
+        body %|Error: #{e}\n#{e.backtrace.join("\n")}|
+      end
+      mail.deliver!
+    end
+  end
+
 end

@@ -4,7 +4,7 @@ require 'lib/quick_cgi'
 
 $DEBUG = false
 
-content = QuickCGI::Page.generate do
+content = QuickCGI::Generator.generate do
   title "Test page"
   admin_email 'geoffk@ci.garden-grove.ca.us'
   @test_variable = 'three'

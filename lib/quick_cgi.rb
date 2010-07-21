@@ -111,6 +111,7 @@ module QuickCGI
 
     # Returns a hash of the CGI parameters
     def params
+      raise "Invalid CGI" unless @cgi
       @cgi.params
     end
   end

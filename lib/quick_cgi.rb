@@ -2,12 +2,18 @@
 # Library to assist in the making of CGI pages using HAML.
 #
 # Usage:
-# print QuickCGI::Page.run(:admin_email => 'geoffk@garden-grove.org') do
+#
+# require 'quick_cgi' 
+#
+# content = QuickCGI::Generator.generate(:admin_email => 'geoffk@garden-grove.org') do
 #   title "My title"
 #   @my_variable = "Hello"
 #   render(:haml=>'file.haml')
 #   render(:text=>'<p>My html text</p>')
 # end
+#
+# print content
+#
 
 require 'cgi'
 require 'haml'
@@ -17,14 +23,9 @@ DEFAULT_MASTER_LAYOUT = <<TEMP
 %html
   %head
     %title=@title
-    %style{:type=>'text/css'}
-      body { font-family: verdana, arial; }
-      div.header { width: 100%; height: 40px; background-color: #0000ff; text-align: center; display: block; vertical-align: bottom; font-family: verdana, arial, sans-serif; color: white; font-weight: bold; font-size: 24px; }
-      span.comments { font-size: 12px; color: #777; display: block; }
-      td { vertical-align: top; }
-      input.submit { font-weight: bold; }
+    %link{:type=>'text/css', :href=>'/standard.css', :rel=>'stylesheet'}
   %body
-    %div.header=@title
+    %div.title=@title
     =yield
 TEMP
 

@@ -157,7 +157,7 @@ module QuickCGI
     def self.email_error(e)
       return unless @@options[:admin_email]
       mail = Mail.new do
-        from ENV['USER'] + '@' + ENV['HOSTNAME']
+        from 'quick_cgi@ch'
         to @@options[:admin_email]
         subject "CGI ERROR: #{$0}"
         body %|Error: #{e}\n#{e.backtrace.join("\n")}|

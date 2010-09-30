@@ -131,13 +131,13 @@ module QuickCGI
         if @@options[:raise_errors]
           raise
         else
-          email_error(e) if @@options[:admin_email]
-          display_error(e)
+          email_error(e,q.params) if @@options[:admin_email]
+          display_error(e,q.params)
         end
       end
     end
 
-    def self.display_error(e)
+    def self.display_error(e,params=nil)
       output = ""
       output << CGI.new.header if ENV['REQUEST_METHOD']
       output+= <<-END_ERROR
@@ -147,6 +147,7 @@ module QuickCGI
           </head>
           <body>
             <h1>There was an error generating the page!</h1>
+            <p><b>Params:</b> #{params.inspect}</p>
             <p><b>Error: #{e}</b></p>
             <p>#{e.backtrace.join('<br>')}</p>
           </body>
@@ -154,13 +155,13 @@ module QuickCGI
       END_ERROR
     end
 
-    def self.email_error(e)
+    def self.email_error(e,params=nil)
       return unless @@options[:admin_email]
       mail = Mail.new do
         from 'quick_cgi@ch'
         to @@options[:admin_email]
         subject "CGI ERROR: #{$0}"
-        body %|Error: #{e}\n#{e.backtrace.join("\n")}|
+        body %|Params: #{params.inspect}\nError: #{e}\n#{e.backtrace.join("\n")}|
       end
       mail.deliver!
     end

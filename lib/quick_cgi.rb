@@ -38,15 +38,15 @@ module QuickCGI
 
     def initialize(options={})
       @title = 'QuickCGI Page Default Title'
-      @master_layout_file = nil
+      @master_layout_file = options[:layout]
       @cgi = CGI.new
       @page_contents = ""
       @admin_email = nil
     end
 
     def generate
-      if master_layout_file
-        layout = File.read(q.master_layout_file)
+      if @master_layout_file
+        layout = File.read(@master_layout_file)
       else
         layout = DEFAULT_MASTER_LAYOUT
       end
@@ -96,13 +96,6 @@ module QuickCGI
     end
     alias_method :title=, :title
 
-    # Set or return an alternative haml file to be used as the master layout
-    def master_layout_file(f=nil)
-      return @master_layout_file unless f
-      @master_layour_file = f
-    end
-    alias_method :master_layout_file=, :master_layout_file
-
     # Set or return admin email address for error emails
     def admin_email(e=nil)
       return @admin_email unless e
@@ -121,7 +114,8 @@ module QuickCGI
     def self.generate(options={},&block)
       @@options = {
         :raise_errors => false, # Raises errors instead of handling them internally
-        :admin_email => nil
+        :admin_email => nil,
+        :layout => nil
       }.merge(options)
       begin
         q = Page.new(options)
@@ -146,7 +140,7 @@ module QuickCGI
             <title>Error found!</title>
           </head>
           <body>
-            <h1>There was an error generating the page!</h1>
+            <h1>There was an error generating the page! Please try again later.</h1>
             <p><b>Params:</b> #{params.inspect}</p>
             <p><b>Error: #{e}</b></p>
             <p>#{e.backtrace.join('<br>')}</p>

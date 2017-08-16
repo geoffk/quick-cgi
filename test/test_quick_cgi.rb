@@ -4,7 +4,7 @@ require 'test/unit'
 require 'tempfile'
 require 'nokogiri'
 
-require 'lib/quick_cgi.rb'
+require './lib/quick_cgi.rb'
 require 'cgi_mock.rb'
 require 'mail_mock.rb'
 require 'helper.rb'

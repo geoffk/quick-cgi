@@ -1,6 +1,6 @@
 #!/usr/bin/ruby
 require 'rubygems'
-require 'lib/quick_cgi'
+require './lib/quick_cgi'
 
 $DEBUG = false
 
